@@ -179,7 +179,7 @@ def main():
                 error_times = 0
             except:
                 date_str = first_day.strftime('%Y/%m/%d')
-                logging.error('Crawl raise error {}'.format(date_str))
+                logging.error('Crawl raise error {}'.format(date_str), exc_info=True)
                 error_times += 1
                 continue
             finally:
