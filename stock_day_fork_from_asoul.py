@@ -76,6 +76,7 @@ class Crawler():
 
             sign = tr.xpath('td/font/text()')
             sign = '-' if len(sign) == 1 and sign[0] == '－' else ''
+            per = '0' if len(tds) < 15 and len(tds) > 0 else tds[14]
 
             row = self._clean_row([
                 date_str, # 日期
@@ -91,7 +92,7 @@ class Crawler():
                 tds[11], # 最後揭示買量
                 tds[12], # 最後揭示賣價
                 tds[13], # 最後揭示賣量
-                tds[14], # 本益比
+                per, # 本益比
             ])
             self._record(tds[0].strip(), row, 'tse')
 
