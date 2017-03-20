@@ -1,4 +1,5 @@
 import os
+import gc
 import re
 import sys
 import csv
@@ -18,6 +19,8 @@ class Crawler():
         ''' Make directory if not exist when initialize '''
         if not isdir(prefix):
             mkdir(prefix)
+            mkdir(prefix+'/tse')
+            mkdir(prefix+'/otc')
         self.prefix = prefix
 
     def _clean_row(self, row):
@@ -27,10 +30,26 @@ class Crawler():
             row[index] = "".join([x for x in row[index] if x in string.printable])
         return row
 
-    def _record(self, stock_id, row):
+    def _record(self, stock_id, row, data_type='tse'):
         ''' Save row to csv file '''
-        f = open('{}/{}.csv'.format(self.prefix, stock_id), 'a')
+        file_name = '{}/{}/{}.csv'.format(self.prefix, data_type, stock_id)
+
+        file_exist_flag = True
+        if not os.path.isfile(file_name):
+            file_exist_flag = False
+
+        f = open(file_name, 'a')
         cw = csv.writer(f, lineterminator='\n')
+
+        if file_exist_flag == False:
+            if data_type == 'tse':
+                cw.writerow(['日期', '成交股數', '成交金額', '開盤價', '最高價',
+                    '最低價', '收盤價', '漲跌價差', '成交筆數', '最後揭示買價', '最後揭示買量',
+                    '最後揭示賣價', '最後揭示賣量', '本益比'])
+            elif data_type == 'otc':
+                cw.writerow(['日期', '成交股數', '成交金額', '開盤價', '最高價',
+                    '最低價', '收盤價', '漲跌價差', '成交筆數'])
+
         cw.writerow(row)
         f.close()
 
@@ -68,9 +87,13 @@ class Crawler():
                 tds[8], # 收盤價
                 sign + tds[9], # 漲跌價差
                 tds[3], # 成交筆數
+                tds[10], # 最後揭示買價
+                tds[11], # 最後揭示買量
+                tds[12], # 最後揭示賣價
+                tds[13], # 最後揭示賣量
+                tds[14], # 本益比
             ])
-
-            self._record(tds[0].strip(), row)
+            self._record(tds[0].strip(), row, 'tse')
 
     def _get_otc_data(self, date_str):
         ttime = str(int(time.time()*100))
@@ -100,7 +123,7 @@ class Crawler():
                     tr[3], # 漲跌價差
                     tr[10] # 成交筆數
                 ])
-                self._record(tr[0], row)
+                self._record(tr[0], row, 'otc')
 
 
     def get_data(self, year, month, day):
@@ -161,6 +184,7 @@ def main():
                 continue
             finally:
                 first_day -= timedelta(1)
+            gc.collect()
     else:
         crawler.get_data(first_day.year, first_day.month, first_day.day)
 
