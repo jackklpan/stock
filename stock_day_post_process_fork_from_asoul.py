@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+import better_exceptions
 
 TSE_FOLDER = 'data/tse'
 OTC_FOLDER = 'data/otc'

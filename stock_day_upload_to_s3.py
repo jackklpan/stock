@@ -8,3 +8,4 @@ for dir_path, dirs, files in os.walk("./data"):
         if file_path.endswith(".csv"):
             # print(file_path)
             client.upload_file(file_path, 'stock-ej04xjp6', file_name)
+            client.put_object_acl(ACL='public-read', Bucket='stock-ej04xjp6', Key=file_name)
